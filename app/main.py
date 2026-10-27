@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import json
 
 from openai import OpenAI
 
@@ -62,7 +63,7 @@ def main():
         require_tool = message.tool_calls[0]
         function_name = require_tool.function.name
         if function_name == "Read" :
-            function_args = require_tool.function.arguments
+            function_args = json.loads(require_tool.function.arguments)
             try : 
                 with open(function_args["file_path"]) as file:
                     content = file.read()
