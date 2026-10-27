@@ -54,7 +54,7 @@ def main():
     print("Logs from your program will appear here!", file=sys.stderr)
 
     # DONE: Uncomment the following line to pass the first stage
-    # print(response_choice.message.content)
+    print(response_choice.message.content)
 
     has_tool_call = response_choice.message.tool_calls
 
@@ -63,7 +63,7 @@ def main():
         require_tool = message.tool_calls[0]
         function_name = require_tool.function.name
 
-    elif function_name == "Read"  and not has_tool_call:
+        if function_name == "Read" :
             function_args = json.loads(require_tool.function.arguments)
             try : 
                 with open(function_args["file_path"]) as file:
