@@ -42,14 +42,34 @@ def main():
         ]
     )
 
-    if not chat.choices or len(chat.choices) == 0:
+    has_chat_response = chat.choices and len(chat.choices) > 0
+
+    if not has_chat_response:
         raise RuntimeError("no choices in response")
+
+    response_choice = chat.choices[0]
 
     # You can use print statements as follows for debugging, they'll be visible when running tests.
     print("Logs from your program will appear here!", file=sys.stderr)
 
-    # TODO: Uncomment the following line to pass the first stage
-    print(chat.choices[0].message.content)
+    # DONE: Uncomment the following line to pass the first stage
+    print(response_choice.message.content)
+
+    has_tool_call = response_choice.tool_calls
+
+    if has_tool_call :
+        message = response_choice.message
+        require_tool = message.tool_calls[0]
+        function_name = require_tool.function.name
+        if function_name == "Read" :
+            function_args = require_tool.function.arguments
+            try : 
+                with open(function_args["file_path"]) as file:
+                    content = file.read()
+                    sys.stdout.write(content)
+            except Exception as e:
+                print(f"Error reading file: {e}", file=sys.stderr)
+
 
 
 if __name__ == "__main__":
