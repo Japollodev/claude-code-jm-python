@@ -57,6 +57,9 @@ def main():
     # print(response_choice.message.content)
 
     has_tool_call = response_choice.message.tool_calls
+    number_of_tools = len(response_choice.message.tool_calls)
+
+    print(number_of_tools)
 
     if has_tool_call :
         message = response_choice.message
