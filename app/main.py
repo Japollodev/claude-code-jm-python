@@ -69,7 +69,7 @@ def main():
                     content_2 = file.read()
                     # print(content_2)
             except Exception as e:
-                # print(f"Error reading file: {e}", file=sys.stderr)
+                print(f"Error reading file: {e}, hi", file=sys.stderr, )
 
 
 
