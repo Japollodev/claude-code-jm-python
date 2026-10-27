@@ -54,7 +54,9 @@ def main():
     print("Logs from your program will appear here!", file=sys.stderr)
 
     # DONE: Uncomment the following line to pass the first stage
-    print(response_choice.message.content)
+    has_no_content = response_choice.message.content == None
+    if not has_no_content :
+        print(response_choice.message.content)
 
     has_tool_call = response_choice.tool_calls
 
