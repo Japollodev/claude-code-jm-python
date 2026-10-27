@@ -56,7 +56,7 @@ def main():
     # DONE: Uncomment the following line to pass the first stage
     print(response_choice.message.content)
 
-    has_tool_call = response_choice.tool_calls
+    has_tool_call = response_choice.message.tool_calls
 
     if has_tool_call :
         message = response_choice.message
