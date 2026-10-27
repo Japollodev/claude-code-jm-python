@@ -67,9 +67,9 @@ def main():
             try : 
                 with open(function_args["file_path"]) as file:
                     content_2 = file.read()
-                    print(content_2)
+                    # print(content_2)
             except Exception as e:
-                print(f"Error reading file: {e}", file=sys.stderr)
+                # print(f"Error reading file: {e}", file=sys.stderr)
 
 
 
