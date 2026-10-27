@@ -62,7 +62,8 @@ def main():
         message = response_choice.message
         require_tool = message.tool_calls[0]
         function_name = require_tool.function.name
-        if function_name == "Read" :
+
+    elif function_name == "Read"  and not has_tool_call:
             function_args = json.loads(require_tool.function.arguments)
             try : 
                 with open(function_args["file_path"]) as file:
