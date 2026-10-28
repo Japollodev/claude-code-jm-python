@@ -1,4 +1,3 @@
-from _typeshed import sentinel
 import argparse
 import os
 import sys
@@ -14,6 +13,9 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("-p", required=True)
     args = p.parse_args()
+    user_input = ""
+    messages = []
+    sentinel = "exit"
 
     messages = []
     sentinel = "exit"
@@ -24,7 +26,7 @@ def main():
 
     client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
 
-    while sentinel == exit :
+    while not user_input  == sentinel:
         # Chat initiated
         chat = client.chat.completions.create(
             model="anthropic/claude-haiku-4.5",
