@@ -66,7 +66,7 @@ def main():
         # If no msg exit
         if not has_no_msg :
             print(response_choice, "<- has no message")
-            exit
+            break
         # Add message to messages
         messages.append(response_choice.message)
         tool_calls = response_choice.message.tool_calls
@@ -74,7 +74,7 @@ def main():
         # Check and ensure tool call exists
         if not has_tool_call :
             sys.stdout.write(response_choice.message.content)
-            exit
+            break
         # Loop through the tool calls since they exist
         for tool in tool_calls:
             function_name = tool.function.name
