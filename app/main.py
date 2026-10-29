@@ -17,7 +17,7 @@ def main():
     messages = []
     sentinel = "exit"
 
-    messages = []
+    messages = [{"role": "user", "content": args.p}]
     sentinel = "exit"
 
     if not API_KEY:
@@ -30,7 +30,7 @@ def main():
         # Chat initiated
         chat = client.chat.completions.create(
             model="anthropic/claude-haiku-4.5",
-            messages=messages,
+            messages= messages,
             tools=[
                 {
                     "type": "function",
