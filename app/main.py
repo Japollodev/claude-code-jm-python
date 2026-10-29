@@ -75,7 +75,7 @@ def main():
             function_name = tool.function.name
             tool_id = tool.id
             # Handle Read tool calls
-            if function_name is "Read" :
+            if function_name == "Read" :
                 try : 
                     function_args = json.loads(tool.function.arguments)
                     # Execute tool call on file path
@@ -104,5 +104,5 @@ def main():
 
 
 
-if __name__ is "__main__":
+if __name__ == "__main__":
     main()
