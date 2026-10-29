@@ -75,7 +75,7 @@ def main():
         has_tool_call = len(tool_calls) > 0 if not tool_calls == None else False
         # Check and ensure tool call exists
         if not has_tool_call :
-            sys.stdout.write(response_choice.message.content or "", file = sys.stderr)
+            sys.stdout.write(response_choice.message.content or "")
             break
         # Loop through the tool calls since they exist
         for tool in tool_calls:
