@@ -30,7 +30,7 @@ def main():
         # Chat initiated
         chat = client.chat.completions.create(
             model="anthropic/claude-haiku-4.5",
-            messages=[{"role": "user", "content": args.p}],
+            messages=messages,
             tools=[
                 {
                     "type": "function",
