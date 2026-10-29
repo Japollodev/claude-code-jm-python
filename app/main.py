@@ -14,7 +14,9 @@ def main():
     p.add_argument("-p", required=True)
     args = p.parse_args()
     user_input = ""
-    messages = []
+    sentinel = "exit"
+
+    messages = [{"role": "user", "content": args.p}]
     sentinel = "exit"
 
     if not API_KEY:
@@ -27,7 +29,7 @@ def main():
         # Chat initiated
         chat = client.chat.completions.create(
             model="anthropic/claude-haiku-4.5",
-            messages=[{"role": "user", "content": args.p}],
+            messages= messages,
             tools=[
                 {
                     "type": "function",
@@ -62,7 +64,7 @@ def main():
         # You can use print statements as follows for debugging, they'll be visible when running tests.
         print("Logs from your program will appear here!", file=sys.stderr)
         # Check if the response has a msg
-        has_no_msg = response_choice.message == None or len(response_choice.message) <= 0
+        has_no_msg = response_choice.message == None 
         # If no msg exit
         if has_no_msg :
             print(response_choice, "<- has no message")
@@ -70,7 +72,7 @@ def main():
         # Add message to messages
         messages.append(response_choice.message)
         tool_calls = response_choice.message.tool_calls
-        has_tool_call = len(tool_calls) > 0 or tool_calls == None
+        has_tool_call = len(tool_calls) > 0 if not tool_calls == None else False
         # Check and ensure tool call exists
         if not has_tool_call :
             sys.stdout.write(response_choice.message.content or "")
@@ -90,7 +92,14 @@ def main():
                             "content": content
                         })
                 except Exception as e:
-                    print(f"Error reading file: {e}", file=sys.stderr)
+                    content = f"Error reading file: {e}"
+            else :
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_id,
+                    "content": content
+                })
+
 
 
 
