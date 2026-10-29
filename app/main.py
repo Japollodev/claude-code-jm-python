@@ -24,6 +24,27 @@ TOOLS = [
                 "required": ["file_path"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "Write",
+            "description": "Write content to a file",
+            "parameters": {
+                "type": "object",
+                "required": ["file_path", "content"],
+                "properties": {
+                    "file_path": {
+                        "type": "string",
+                        "description": "The path of the file to write to"
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "The content to write to the file"
+                    }
+                }
+            }
+        }
     }
 ]
 
@@ -93,8 +114,29 @@ def main():
                         "tool_call_id": tool_id,
                         "content": content
                     })
+            elif function_name == "Write" :
+                try :
+                    function_args = json.loads(tool.function.arguments)
+                    file_path = function_args["file_path"]
+                    content_to_write = function_args["content"]
+                    os.makedirs(os.path.dirname(file_path) or ".", exist_ok=True)
+                    with open(file_path, "w") as file:
+                        file.write(content_to_write)
+                        messages.append({
+                            "role": "tool",
+                            "tool_call_id": tool_id,
+                            "content": content
+                        })
+                    content = f"Wrote to {file_path}"
+                except Exception as e:
+                    content = f"Error writing to file: {e}"
+                    messages.append({
+                        "role": "tool",
+                        "tool_call_id": tool_id,
+                        "content": content
+                    })
             # Handle all other tool calls
-            else :
+            else:
                 messages.append({
                         "role": "tool",
                         "tool_call_id": tool_id,
