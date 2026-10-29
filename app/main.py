@@ -62,9 +62,9 @@ def main():
         # You can use print statements as follows for debugging, they'll be visible when running tests.
         print("Logs from your program will appear here!", file=sys.stderr)
         # Check if the response has a msg
-        has_no_msg = response_choice.message == None
+        has_no_msg = response_choice.message == None or len(response_choice.message) <= 0
         # If no msg exit
-        if not has_no_msg :
+        if has_no_msg :
             print(response_choice, "<- has no message")
             break
         # Add message to messages
