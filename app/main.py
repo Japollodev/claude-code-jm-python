@@ -1,7 +1,9 @@
 import argparse
 import os
+import subprocess
 import sys
 import json
+from unittest import result
 
 from openai import OpenAI
 
@@ -18,14 +20,53 @@ TOOLS = [
                 "properties": {
                     "file_path": {
                         "type": "string",
-                        "description": "The path to the file to read"
+                        "description": "The path to the file to read",
                     }
                 },
-                "required": ["file_path"]
-            }
-        }
-    }
+                "required": ["file_path"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "Write",
+            "description": "Write content to a file",
+            "parameters": {
+                "type": "object",
+                "required": ["file_path", "content"],
+                "properties": {
+                    "file_path": {
+                        "type": "string",
+                        "description": "The path of the file to write to",
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "The content to write to the file",
+                    },
+                },
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "Bash",
+            "description": "Execute a shell command",
+            "parameters": {
+                "type": "object",
+                "required": ["command"],
+                "properties": {
+                    "command": {
+                        "type": "string",
+                        "description": "The command to execute",
+                    }
+                },
+            },
+        },
+    },
 ]
+
 
 def main():
     p = argparse.ArgumentParser()
@@ -35,16 +76,13 @@ def main():
     messages = [{"role": "user", "content": args.p}]
     if not API_KEY:
         raise RuntimeError("OPENROUTER_API_KEY is not set")
-    
 
     client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
 
     while True:
         # Chat initiated
         chat = client.chat.completions.create(
-            model="anthropic/claude-haiku-4.5",
-            messages= messages,
-            tools= TOOLS
+            model="anthropic/claude-haiku-4.5", messages=messages, tools=TOOLS
         )
         # Create Boolean to check existing response choice
         has_chat_response = chat.choices and len(chat.choices) > 0
@@ -58,16 +96,16 @@ def main():
         # You can use print statements as follows for debugging, they'll be visible when running tests.
         print("Logs from your program will appear here!", file=sys.stderr)
         # Check if the response has a msg
-        has_no_msg = response_choice.message is None 
+        has_no_msg = response_choice.message is None
         # If no msg exit
-        if has_no_msg :
+        if has_no_msg:
             print(response_choice, file=sys.stderr)
             break
         # Add message to messages
         messages.append(response_choice.message)
         tool_calls = response_choice.message.tool_calls
         # Check and ensure tool call exists
-        if not tool_calls :
+        if not tool_calls:
             sys.stdout.write(response_choice.message.content or "")
             break
         # Loop through the tool calls since they exist
@@ -75,33 +113,75 @@ def main():
             function_name = tool.function.name
             tool_id = tool.id
             # Handle Read tool calls
-            if function_name == "Read" :
-                try : 
+            if function_name == "Read":
+                try:
                     function_args = json.loads(tool.function.arguments)
                     # Execute tool call on file path
                     with open(function_args["file_path"]) as file:
                         content = file.read()
-                        messages.append({
-                            "role": "tool",
-                            "tool_call_id": tool_id,
-                            "content": content
-                        })
+                        messages.append(
+                            {
+                                "role": "tool",
+                                "tool_call_id": tool_id,
+                                "content": content,
+                            }
+                        )
                 except Exception as e:
                     content = f"Error reading file: {e}"
-                    messages.append({
-                        "role": "tool",
-                        "tool_call_id": tool_id,
-                        "content": content
-                    })
+                    messages.append(
+                        {"role": "tool", "tool_call_id": tool_id, "content": content}
+                    )
+            elif function_name == "Write":
+                try:
+                    function_args = json.loads(tool.function.arguments)
+                    file_path = function_args["file_path"]
+                    content_to_write = function_args["content"]
+                    os.makedirs(os.path.dirname(file_path) or ".", exist_ok=True)
+                    with open(file_path, "w") as file:
+                        file.write(content_to_write)
+                        messages.append(
+                            {
+                                "role": "tool",
+                                "tool_call_id": tool_id,
+                                "content": content,
+                            }
+                        )
+                    content = f"Wrote to {file_path}"
+                except Exception as e:
+                    content = f"Error writing to file: {e}"
+                    messages.append(
+                        {"role": "tool", "tool_call_id": tool_id, "content": content}
+                    )
+            elif function_name == "Bash":
+
+                try:
+                    function_args = json.loads(tool.function.arguments)
+                    command = function_args["command"] or tool.function.name
+                    result = subprocess.run(
+                        command, shell=True, capture_output=True, text=True
+                    )
+                    content = result.stdout + result.stderr
+                    messages.append(
+                        {
+                            "role": "tool",
+                            "tool_call_id": tool_id,
+                            "content": content,
+                        }
+                    )
+                except Exception as e:
+                    content = f"Error executing bash command: {e}"
+                    messages.append(
+                        {"role": "tool", "tool_call_id": tool_id, "content": content}
+                    )
             # Handle all other tool calls
-            else :
-                messages.append({
+            else:
+                messages.append(
+                    {
                         "role": "tool",
                         "tool_call_id": tool_id,
-                        "content": f"Unknown tool: {function_name}"
-                    })
-
-
+                        "content": f"Unknown tool: {function_name}",
+                    }
+                )
 
 
 if __name__ == "__main__":
