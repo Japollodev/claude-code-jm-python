@@ -158,7 +158,7 @@ def main():
                     function_args = json.loads(tool.function.arguments)
                     command = function_args["command"] or tool.function.name
                     result = subprocess.run(
-                        command, function_args, shell=True, output=True, text=True
+                        command, shell=True, capture_output=True, text=True
                     )
                     content = result.stdout + result.stderr
                     messages.append(
